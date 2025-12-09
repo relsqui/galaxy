@@ -1,16 +1,15 @@
-import { Grid } from '@chakra-ui/react';
+import { Grid } from "@chakra-ui/react";
 
-import { CTASection } from './components/cta-section';
-import { SomeImage } from './components/some-image';
-import { SomeText } from './components/some-text';
+import { Login } from "./components/login";
+import { Room } from "./components/room";
 
-const Home = () => {
+const Home = async () => {
   return (
-    <Grid gap={4}>
-      <SomeText />
-      <SomeImage />
-      <CTASection />
-    </Grid>
+    <>
+      <Login />
+      <Room />
+      <Grid gap={4}></Grid>
+    </>
   );
 };
 
