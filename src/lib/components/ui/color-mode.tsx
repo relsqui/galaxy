@@ -54,7 +54,7 @@ export const ColorModeButton = forwardRef<
           _icon: {
             width: '5',
             height: '5',
-          },
+          }
         }}
       >
         <ColorModeIcon />

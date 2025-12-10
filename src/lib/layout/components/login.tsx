@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import { createClient, Session } from "@supabase/supabase-js";
+import { Stack } from "@chakra-ui/react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -70,7 +71,7 @@ export const Login = () => {
     if (error) {
       alert(error.message);
     } else {
-      alert("Check your email for the login link!");
+      alert("Check your email!");
     }
     setLoading(false);
   };
@@ -82,13 +83,7 @@ export const Login = () => {
 
   // Show verification state
   if (verifying) {
-    return (
-      <div>
-        <h1>Authentication</h1>
-        <p>Confirming your magic link...</p>
-        <p>Loading...</p>
-      </div>
-    );
+    return <div>...</div>;
   }
 
   // Show auth error
@@ -112,31 +107,21 @@ export const Login = () => {
 
   // Show auth success (briefly before session loads)
   if (authSuccess && !session) {
-    return (
-      <div>
-        <h1>Authentication</h1>
-        <p>✓ Authentication successful!</p>
-        <p>Loading your account...</p>
-      </div>
-    );
+    return <div>...</div>;
   }
 
-  // If user is logged in, show welcome screen
   if (session) {
     return (
-      <div>
-        <h1>Welcome!</h1>
-        <p>You are logged in as: {session.user.email}</p>
-        <button onClick={handleLogout}>Sign Out</button>
-      </div>
+      <Stack direction="row">
+        {session.user.email}
+        <button onClick={handleLogout}>Exit</button>
+      </Stack>
     );
   }
 
   // Show login form
   return (
     <div>
-      <h1>Supabase + React</h1>
-      <p>Sign in via magic link with your email below</p>
       <form onSubmit={handleLogin}>
         <input
           type="email"
@@ -146,7 +131,7 @@ export const Login = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
         <button disabled={loading}>
-          {loading ? <span>Loading</span> : <span>Send magic link</span>}
+          {loading ? <span>Loading</span> : <span>Enter</span>}
         </button>
       </form>
     </div>

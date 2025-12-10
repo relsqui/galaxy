@@ -1,6 +1,7 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Center, Box, Flex, Stack } from "@chakra-ui/react";
 
-import { ColorModeButton } from '@/lib/components/ui/color-mode';
+import { ColorModeButton } from "@/lib/components/ui/color-mode";
+import { Login } from "./login";
 
 export const Header = () => {
   return (
@@ -13,7 +14,13 @@ export const Header = () => {
       gridGap={2}
     >
       <Box marginLeft="auto">
-        <ColorModeButton />
+        <Stack direction="row">
+          <Center>
+            <Login />
+            <ColorModeButton />
+
+          </Center>
+        </Stack>
       </Box>
     </Flex>
   );
