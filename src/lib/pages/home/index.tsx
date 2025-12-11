@@ -1,9 +1,9 @@
-import { Room } from "./components/room";
+import { RoomContents } from "./components/room";
 
 const Home = async () => {
   return (
     <>
-      <Room />
+      <RoomContents />
     </>
   );
 };
