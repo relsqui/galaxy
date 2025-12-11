@@ -4,10 +4,10 @@ import {
   Badge,
   Button,
   ButtonGroup,
+  Editable,
   For,
   Heading,
   Stack,
-  Text,
 } from "@chakra-ui/react";
 
 const supabase = createClient(
@@ -25,6 +25,7 @@ interface Room {
   id: number;
   title: string;
   description: string;
+  owner: number;
 }
 
 interface Exit {
@@ -57,6 +58,7 @@ export const Room = () => {
       await supabase.from("person").select().eq("id", id.id).limit(1).single()
     ).data;
     if (!person) return;
+    console.log(person);
     setPerson(person);
   }
 
@@ -71,6 +73,7 @@ export const Room = () => {
         .single()
     ).data;
     if (!room) return;
+    console.log(room);
     setRoom(room);
     const exits = (await supabase.from("exit").select().eq("origin", room.id))
       .data;
@@ -99,26 +102,27 @@ export const Room = () => {
     await getPerson();
   }
 
+  async function updateDescription(newDescription: string) {
+    if (!(person && room && person.id == room.owner)) return null;
+    await supabase.from("room").update({description: newDescription}).eq("id", room.id);
+    await getHere();
+  }
+
   const title = room?.title || "...";
   const description = room?.description || "...";
 
   return (
     <Stack>
       <Heading>{title}</Heading>
-      <Text>{description}</Text>
-      <Stack direction="row">
-        <For each={people}>
-          {(person) => (
-            <Badge size="md" variant="outline" key={person.id}>
-              {person.display_name}
-            </Badge>
-          )}
-        </For>
-      </Stack>
+      <Editable.Root disabled={person?.id != room?.owner} value={description} onValueChange={(e) => updateDescription(e.value)}>
+        <Editable.Preview />
+        <Editable.Textarea />
+      </Editable.Root>
       <ButtonGroup>
         {exits.map((exit) => (
           <Button
-            size="sm"
+            size="xs"
+            variant="outline"
             key={exit.id}
             onClick={async () => await followExit(exit.id)}
           >
@@ -126,6 +130,15 @@ export const Room = () => {
           </Button>
         ))}
       </ButtonGroup>
+      <Stack direction="row">
+        <For each={people}>
+          {(person) => (
+            <Badge size="sm" key={person.id}>
+              {person.display_name}
+            </Badge>
+          )}
+        </For>
+      </Stack>
     </Stack>
   );
 };

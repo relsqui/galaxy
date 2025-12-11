@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import { createClient, Session } from "@supabase/supabase-js";
-import { Stack } from "@chakra-ui/react";
+import { CloseButton, Flex, Separator, Stack, Text } from "@chakra-ui/react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -113,8 +113,11 @@ export const Login = () => {
   if (session) {
     return (
       <Stack direction="row">
-        {session.user.email}
-        <button onClick={handleLogout}>Exit</button>
+        <Flex alignItems="center" gap="1">
+          <Text>{session.user.email}</Text>
+          <Separator orientation="vertical" />
+          <CloseButton size="xs" variant="outline" onClick={handleLogout} />
+        </Flex>
       </Stack>
     );
   }
@@ -125,7 +128,7 @@ export const Login = () => {
       <form onSubmit={handleLogin}>
         <input
           type="email"
-          placeholder="Your email"
+          placeholder="Email"
           value={email}
           required={true}
           onChange={(e) => setEmail(e.target.value)}
