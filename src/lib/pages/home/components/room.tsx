@@ -9,7 +9,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 
-import { Person, Room, Exit } from "./interfaces";
+import { Person, Room, Exit, dbOperation, broadcastPayload } from "./interfaces";
 import { profileDrawer } from "./profileDrawer";
 import { useAuthedPerson } from "../hooks/useAuthedPerson";
 
@@ -26,6 +26,8 @@ export const RoomContents = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [locChannel, setLocChannel] = useState<RealtimeChannel | null>();
 
+  console.log("rendering room")
+
   useEffect(() => {
     getRoomAndContents();
   }, [authedPerson?.location]);
@@ -37,12 +39,32 @@ export const RoomContents = () => {
         .channel(`location:${authedPerson.location}`, {
           config: { private: true },
         })
-        .on('broadcast', { event: 'INSERT' }, (payload) => console.log(payload))
-        .on('broadcast', { event: 'UPDATE' }, (payload) => console.log(payload))
-        .on('broadcast', { event: 'DELETE' }, (payload) => console.log(payload))
+        .on('broadcast', { event: 'INSERT' }, handleBroadcast)
+        .on('broadcast', { event: 'UPDATE' }, handleBroadcast)
+        .on('broadcast', { event: 'DELETE' }, handleBroadcast)
         .subscribe()
     );
   })
+
+  const handleBroadcast = async (broadcast: any) => {
+    console.log([authedPerson, room, exits, people, locChannel]);
+    const { op, table, old_record: oldRecord, record: newRecord }: broadcastPayload = broadcast.payload
+    switch (table) {
+      case "person":
+        let newPeople = [...people];
+        if (newPeople.length && oldRecord.location == authedPerson?.location) {
+          newPeople = people.filter((p) => {
+            return p.id != oldRecord.id
+          });
+        }
+        if (op != dbOperation.DELETE && newRecord.location == authedPerson?.location) {
+          newPeople.push(newRecord);
+        }
+        if (newPeople != people || newPeople.length != people.length) {
+          setPeople(newPeople);
+        }
+    }
+  }
 
   const getRoomAndContents = async () => {
     if (!authedPerson) return;

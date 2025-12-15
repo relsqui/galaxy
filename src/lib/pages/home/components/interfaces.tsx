@@ -22,3 +22,16 @@ export interface Exit {
   origin: number;
   destination: number;
 }
+
+export enum dbOperation {
+  INSERT = "INSERT",
+  UPDATE = "UPDATE",
+  DELETE = "DELETE"
+}
+
+export interface broadcastPayload {
+  op: dbOperation,
+  table: string,
+  old_record: any,
+  record: any
+}
