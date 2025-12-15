@@ -1,45 +1,37 @@
-"use client";
-
 import {
   Avatar,
   createOverlay,
   Drawer,
   Portal,
   Editable,
-} from "@chakra-ui/react";
-import { Person } from "./interfaces";
+  CreateOverlayProps,
+} from '@chakra-ui/react';
+import { Person } from './interfaces';
+import { useAuthedPerson } from '../hooks/useAuthedPerson';
 
-interface profileDrawerProps {
-  person: Person;
-  authedPerson: Person | null;
-  updateAuthedPerson: (newPerson?: Partial<Person>) => Promise<void>;
-}
 
-export const profileDrawer = createOverlay<profileDrawerProps>((props) => {
-  const { person, authedPerson, updateAuthedPerson, ...overlayProps } = props;
+export const profileDrawer = createOverlay<{ person: Person }>((props) => {
+  const [authedPerson, updateAuthedPerson] = useAuthedPerson();
+  const person = props.person;
+  const rootProps: CreateOverlayProps = props;
 
-  const updateName = async (e: Editable.ValueChangeDetails) => {
+  const updatePerson = async (field: keyof Person, e: Editable.ValueChangeDetails) => {
     if (e.value.length < 1 || person.id != authedPerson?.id) return;
-    await updateAuthedPerson({ display_name: e.value });
-  };
-
-  const updateDescription = async (e: Editable.ValueChangeDetails) => {
-    if (e.value.length < 1 || person.id != authedPerson?.id) return;
-    await updateAuthedPerson({ description: e.value });
-  };
+    console.log(e)
+    await updateAuthedPerson({ [field]: e.value });
+  }
 
   return (
-    <Drawer.Root {...overlayProps}>
+    <Drawer.Root {...rootProps}>
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
           <Drawer.Content>
             <Drawer.Header>
-              <Drawer.Title>
-                {/* TODO: how do I style the editable as the title? */}
+              <Drawer.Title asChild>
                 <Editable.Root
                   value={person.display_name}
-                  onValueChange={updateName}
+                  onValueCommit={(e) => updatePerson("display_name", e)}
                   activationMode="click"
                   disabled={person.id != authedPerson?.id}
                 >
@@ -52,15 +44,16 @@ export const profileDrawer = createOverlay<profileDrawerProps>((props) => {
               <Avatar.Root shape="rounded" size="2xl">
                 <Avatar.Fallback name={person.display_name} />
               </Avatar.Root>
-              {/* TODO: Same styling question here with the description. */}
-              <Editable.Root
-                value={person.description}
-                onValueChange={updateDescription}
-                disabled={person.id != authedPerson?.id}
-              >
-                <Editable.Preview />
-                <Editable.Input />
-              </Editable.Root>
+              <Drawer.Description asChild>
+                <Editable.Root
+                  value={person.description}
+                  onValueCommit={(e) => updatePerson("description", e)}
+                  disabled={person.id != authedPerson?.id}
+                >
+                  <Editable.Preview />
+                  <Editable.Input />
+                </Editable.Root>
+              </Drawer.Description>
             </Drawer.Body>
           </Drawer.Content>
         </Drawer.Positioner>

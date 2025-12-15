@@ -1,3 +1,5 @@
+// TODO: https://supabase.com/docs/reference/javascript/typescript-support
+
 export interface Person {
   id: number;
   created_at: Date;

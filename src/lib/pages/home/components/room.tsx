@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, RealtimeChannel } from "@supabase/supabase-js";
 import {
   Button,
   ButtonGroup,
@@ -17,19 +17,37 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
+await supabase.realtime.setAuth() // Needed for Realtime Authorization
 
 export const RoomContents = () => {
   const [authedPerson, updateAuthedPerson] = useAuthedPerson();
   const [room, setRoom] = useState<Room | null>();
   const [exits, setExits] = useState<Array<Exit>>([]);
   const [people, setPeople] = useState<Person[]>([]);
+  const [locChannel, setLocChannel] = useState<RealtimeChannel | null>();
 
   useEffect(() => {
     getHere();
   }, [authedPerson?.location]);
 
+  useEffect(() => {
+    if (locChannel || !authedPerson) return;
+    setLocChannel(
+      supabase
+        .channel(`location:${authedPerson.location}`, {
+          config: { private: true },
+        })
+        .on('broadcast', { event: 'INSERT' }, (payload) => console.log(payload))
+        .on('broadcast', { event: 'UPDATE' }, (payload) => console.log(payload))
+        .on('broadcast', { event: 'DELETE' }, (payload) => console.log(payload))
+        .subscribe()
+    );
+  })
+
   const getHere = async () => {
     if (!authedPerson) return;
+    const oldRoomId = authedPerson?.location;
+
     const room = (
       await supabase
         .from("room")
@@ -39,16 +57,22 @@ export const RoomContents = () => {
     ).data;
     if (!room) return;
     setRoom(room);
+
     const exits = (await supabase.from("exit").select().eq("origin", room.id))
       .data;
     if (exits) {
       setExits(exits);
     }
+
     const people = (
       await supabase.from("person").select().eq("location", room.id)
     ).data;
     if (people) {
       setPeople(people);
+    }
+
+    if (locChannel && oldRoomId != room.id) {
+      supabase.removeChannel(locChannel);
     }
   };
 
@@ -107,9 +131,7 @@ export const RoomContents = () => {
               key={person.id}
               onClick={async () =>
                 await profileDrawer.open("profileDrawer", {
-                  authedPerson,
-                  updateAuthedPerson,
-                  person,
+                  person
                 })
               }
             >
