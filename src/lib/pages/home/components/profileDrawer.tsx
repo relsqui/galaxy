@@ -4,25 +4,27 @@ import {
   Drawer,
   Portal,
   Editable,
-  CreateOverlayProps,
 } from '@chakra-ui/react';
 import { Person } from './interfaces';
-import { useAuthedPerson } from '../hooks/useAuthedPerson';
+import { useState } from 'react';
 
 
-export const profileDrawer = createOverlay<{ person: Person }>((props) => {
-  const [authedPerson, updateAuthedPerson] = useAuthedPerson();
-  const person = props.person;
-  const rootProps: CreateOverlayProps = props;
+export const profileDrawer = createOverlay<{
+  person: Person,
+  disabled: boolean,
+  updateAuthedPerson: (newPerson?: Partial<Person>) => Promise<void>
+}>((props) => {
+  const { person, disabled, updateAuthedPerson } = props;
+  const [formName, setFormName] = useState<string>(person.display_name);
+  const [formDescription, setFormDescription] = useState<string>(person.description);
 
-  const updatePerson = async (field: keyof Person, e: Editable.ValueChangeDetails) => {
-    if (e.value.length < 1 || person.id != authedPerson?.id) return;
-    console.log(e)
-    await updateAuthedPerson({ [field]: e.value });
+  const updatePerson = async (field: keyof Person, value: string) => {
+    if (value.length < 1) return;
+    await updateAuthedPerson({ [field]: value });
   }
 
   return (
-    <Drawer.Root {...rootProps}>
+    <Drawer.Root {...props}>
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
@@ -30,10 +32,11 @@ export const profileDrawer = createOverlay<{ person: Person }>((props) => {
             <Drawer.Header>
               <Drawer.Title asChild>
                 <Editable.Root
-                  value={person.display_name}
-                  onValueCommit={(e) => updatePerson("display_name", e)}
+                  value={formName}
+                  onValueChange={(e) => setFormName(e.value)}
+                  onValueCommit={() => updatePerson("display_name", formName)}
                   activationMode="click"
-                  disabled={person.id != authedPerson?.id}
+                  disabled={disabled}
                 >
                   <Editable.Preview />
                   <Editable.Input />
@@ -42,13 +45,14 @@ export const profileDrawer = createOverlay<{ person: Person }>((props) => {
             </Drawer.Header>
             <Drawer.Body>
               <Avatar.Root shape="rounded" size="2xl">
-                <Avatar.Fallback name={person.display_name} />
+                <Avatar.Fallback name={formName} />
               </Avatar.Root>
               <Drawer.Description asChild>
                 <Editable.Root
-                  value={person.description}
-                  onValueCommit={(e) => updatePerson("description", e)}
-                  disabled={person.id != authedPerson?.id}
+                  value={formDescription}
+                  onValueChange={(e) => setFormDescription(e.value)}
+                  onValueCommit={() => updatePerson("description", formDescription)}
+                  disabled={disabled}
                 >
                   <Editable.Preview />
                   <Editable.Input />

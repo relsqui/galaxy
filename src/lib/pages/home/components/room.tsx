@@ -27,7 +27,7 @@ export const RoomContents = () => {
   const [locChannel, setLocChannel] = useState<RealtimeChannel | null>();
 
   useEffect(() => {
-    getHere();
+    getRoomAndContents();
   }, [authedPerson?.location]);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export const RoomContents = () => {
     );
   })
 
-  const getHere = async () => {
+  const getRoomAndContents = async () => {
     if (!authedPerson) return;
     const oldRoomId = authedPerson?.location;
 
@@ -93,7 +93,7 @@ export const RoomContents = () => {
       .from("room")
       .update({ description: newDescription })
       .eq("id", room.id);
-    await getHere();
+    await getRoomAndContents();
   };
 
   const title = room?.title || "In Between";
@@ -131,7 +131,9 @@ export const RoomContents = () => {
               key={person.id}
               onClick={async () =>
                 await profileDrawer.open("profileDrawer", {
-                  person
+                  person,
+                  disabled: person.id != authedPerson?.id,
+                  updateAuthedPerson
                 })
               }
             >

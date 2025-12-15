@@ -20,22 +20,21 @@ export const useAuthedPerson = (): [
   const updateAuthedPerson = async (personUpdates?: Partial<Person>) => {
     // try to use the authedPerson we already have
     let updatedPerson = authedPerson;
-    // if we don't have one, go get one
-    if (!authedPerson) {
-      // a user can only view their own auth_user row
-      const idRow = (await supabase.from("auth_user").select("id").single()).data;
-      if (!idRow) return;
+    // otherwise go get one
+    if (!updatedPerson) {
+      const authId = (await supabase.auth.getUser())?.data?.user?.id;
+      if (!authId) return;
+      const userId = (await supabase.from("auth_user").select("id").eq("auth_id", authId).single()).data?.id;
+      if (!userId) return;
       updatedPerson = (
         await supabase
           .from("person")
           .select()
-          .eq("id", idRow.id)
+          .eq("id", userId)
           .single()
       ).data;
     }
-    // now that we know who we are we can change
     if (updatedPerson && personUpdates) {
-      console.log(personUpdates)
       updatedPerson = (
         await supabase
           .from("person")
