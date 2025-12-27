@@ -4,23 +4,27 @@ import {
   Drawer,
   Portal,
   Editable,
+  Stack,
+  Button,
 } from '@chakra-ui/react';
-import { Person } from './interfaces';
+import { Person } from '@/lib/pages/home/components/interfaces';
 import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { selectCurrentNeighbors, selectCurrentPerson } from '@/app/store/slices/currentSelectors';
+import { updatePerson } from '@/app/store/slices/personSlice';
 
 
-export const profileDrawer = createOverlay<{
-  person: Person,
-  disabled: boolean,
-  updateAuthedPerson: (newPerson?: Partial<Person>) => Promise<void>
-}>((props) => {
-  const { person, disabled, updateAuthedPerson } = props;
+export const profileDrawer = createOverlay<{ person: Person }>(props => {
+  const { person } = props;
+  const authedPerson = useAppSelector(selectCurrentPerson);
+  const disabled = person.id != authedPerson.id;
   const [formName, setFormName] = useState<string>(person.display_name);
   const [formDescription, setFormDescription] = useState<string>(person.description);
+  const dispatch = useAppDispatch();
 
-  const updatePerson = async (field: keyof Person, value: string) => {
+  const dispatchUpdatePerson = async (field: keyof Person, value: string) => {
     if (value.length < 1) return;
-    await updateAuthedPerson({ [field]: value });
+    dispatch(updatePerson({ id: person.id, [field]: value }));
   }
 
   return (
@@ -34,7 +38,7 @@ export const profileDrawer = createOverlay<{
                 <Editable.Root
                   value={formName}
                   onValueChange={(e) => setFormName(e.value)}
-                  onValueCommit={() => updatePerson("display_name", formName)}
+                  onValueCommit={() => dispatchUpdatePerson("display_name", formName)}
                   activationMode="click"
                   disabled={disabled}
                 >
@@ -51,7 +55,7 @@ export const profileDrawer = createOverlay<{
                 <Editable.Root
                   value={formDescription}
                   onValueChange={(e) => setFormDescription(e.value)}
-                  onValueCommit={() => updatePerson("description", formDescription)}
+                  onValueCommit={() => dispatchUpdatePerson("description", formDescription)}
                   disabled={disabled}
                 >
                   <Editable.Preview />
@@ -65,3 +69,24 @@ export const profileDrawer = createOverlay<{
     </Drawer.Root>
   );
 });
+
+export const People = () => {
+  const people = useAppSelector(selectCurrentNeighbors);
+  return (
+    <Stack direction="row">
+      {people.map((person) => (
+        <Button
+          size="xs"
+          variant="surface"
+          key={person.id}
+          onClick={async () =>
+            await profileDrawer.open("profileDrawer", { person })
+          }
+        >
+          {person.display_name}
+        </Button>
+      ))
+      }
+    </Stack >
+  )
+}

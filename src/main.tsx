@@ -3,7 +3,14 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { Provider } from '@/lib/components/ui/provider';
+import { Provider as ReduxProvider } from 'react-redux';
+import { store } from './app/store';
+import { fetchAuthedID } from './app/store/slices/authedIDSlice';
+import { fetchRooms } from './app/store/slices/roomSlice';
+import { fetchPeople } from './app/store/slices/personSlice';
+import { fetchExits } from './app/store/slices/exitSlice';
+
+import { Provider as UIProvider } from '@/lib/components/ui/provider';
 import Page404 from '@/lib/pages/404';
 import { queryClient } from '@/lib/services/constants';
 
@@ -41,14 +48,20 @@ declare module '@tanstack/react-router' {
 // Render the app
 const rootElement = document.getElementById('app');
 if (rootElement && !rootElement.innerHTML) {
+  await store.dispatch(fetchAuthedID());
+  await store.dispatch(fetchPeople());
+  await store.dispatch(fetchRooms());
+  await store.dispatch(fetchExits());
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <Provider>
+      <UIProvider>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
+          <ReduxProvider store={store}>
+            <RouterProvider router={router} />
+          </ReduxProvider>
         </QueryClientProvider>
-      </Provider>
+      </UIProvider>
     </StrictMode>,
   );
 }
