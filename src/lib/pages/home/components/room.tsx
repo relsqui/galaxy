@@ -35,7 +35,7 @@ export const RoomContents = () => {
       <Stack>
         <Heading asChild>
           <Editable.Root
-            disabled={authedPerson.id != room?.owner}
+            disabled={authedPerson.id != room.owner}
             value={roomTitle}
             onValueChange={e => setRoomTitle(e.value)}
             onValueCommit={dispatchUpdateRoom}
@@ -45,7 +45,7 @@ export const RoomContents = () => {
           </Editable.Root>
         </Heading>
         <Editable.Root
-          disabled={authedPerson.id != room?.owner}
+          disabled={authedPerson.id != room.owner}
           value={roomDescription}
           onValueChange={e => setRoomDescription(e.value)}
           onValueCommit={dispatchUpdateRoom}
