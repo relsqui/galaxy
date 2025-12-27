@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, createEntityAdapter } from "@reduxjs/toolkit"
 import { createClient } from "@supabase/supabase-js";
 import { RootState } from ".."
-import { Exit } from "@/lib/pages/home/components/interfaces";
+import { AtLeastID, Exit } from "@/lib/pages/home/components/interfaces";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -20,13 +20,19 @@ export const fetchExits = createAsyncThunk("exit/fetchExits", async () => {
 
 export const createExit = createAsyncThunk(
   "exit/createExit",
+  // TODO: this Partial should actually require origin, destination, and title
   async (newExit: Partial<Exit>) => {
     return (await supabase.from("exit").insert(newExit).select().single()).data;
   }
 );
 
-export const updateExit = createAsyncThunk("exit/updateExit", async (updates: Partial<Exit>) => {
-  return (await supabase.from("exit").update(updates).select().single()).data;
+export const updateExit = createAsyncThunk("exit/updateExit", async (exit: AtLeastID<Exit>) => {
+  return (await supabase.from("exit").update(exit).eq("id", exit.id).select().single()).data;
+})
+
+export const deleteExit = createAsyncThunk("exit/deleteExit", async (exit: AtLeastID<Exit>) => {
+  await supabase.from("exit").delete().eq("id", exit.id);
+  return exit.id;
 })
 
 export const exitSlice = createSlice({
@@ -38,6 +44,7 @@ export const exitSlice = createSlice({
       .addCase(fetchExits.fulfilled, exitAdapter.setAll)
       .addCase(createExit.fulfilled, exitAdapter.addOne)
       .addCase(updateExit.fulfilled, exitAdapter.updateOne)
+      .addCase(deleteExit.fulfilled, exitAdapter.removeOne)
   }
 });
 

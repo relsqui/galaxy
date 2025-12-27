@@ -1,13 +1,10 @@
 import { Button, ButtonGroup, Group, IconButton, Input, NativeSelect, Popover, Portal, Stack } from "@chakra-ui/react"
 import { LuCirclePlus } from "react-icons/lu"
-import { Exit, Room } from "@/lib/pages/home/components/interfaces"
-import { useAuthedPerson } from "@/lib/pages/home/hooks/useAuthedPerson";
+import { Exit } from "@/lib/pages/home/components/interfaces"
 import { createClient } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectCurrentExits, selectCurrentPerson } from "@/app/store/slices/currentSelectors";
-import { fetchPeople, updatePerson } from "@/app/store/slices/personSlice";
-import { fetchExits } from "@/app/store/slices/exitSlice";
+import { useAppSelector } from "@/app/hooks";
+import { selectCurrentExits, selectCurrentPerson, selectCurrentRoom, selectOwnedRooms } from "@/app/store/slices/currentSelectors";
+import { useMoveTo } from "../hooks/useMoveTo";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -17,16 +14,12 @@ const supabase = createClient(
 export const Exits = () => {
   const exits = useAppSelector(selectCurrentExits);
   const currentPerson = useAppSelector(selectCurrentPerson);
-  const dispatch = useAppDispatch();
+  const moveTo = useMoveTo();
 
   const followExit = async (exit: Exit) => {
-    if (exit.origin != currentPerson.location) return;
-    await dispatch(updatePerson({
-      id: currentPerson.id,
-      location: exit.destination
-    }));
-    await dispatch(fetchPeople());
-    await dispatch(fetchExits());
+    if (exit.origin == currentPerson.location) {
+      await moveTo(exit.destination);
+    }
   }
 
   return (
@@ -47,19 +40,9 @@ export const Exits = () => {
 }
 
 const NewExitButton = () => {
-  const [authedPerson, _] = useAuthedPerson();
-  const [ownedRooms, setOwnedRooms] = useState<Room[]>([]);
-
-  useEffect(() => {
-    if (!authedPerson) return;
-    supabase.from("room").select().eq("owner", authedPerson.id).then(({ data, error }) => {
-      if (error) {
-        console.log(error);
-      } else {
-        setOwnedRooms(data)
-      }
-    })
-  }, [authedPerson])
+  const authedPerson = useAppSelector(selectCurrentPerson);
+  const currentRoom = useAppSelector(selectCurrentRoom);
+  const ownedRooms = useAppSelector(selectOwnedRooms);
 
   const addExitTo = async (destination: number, name: string) => {
     if (!authedPerson) return;
@@ -85,7 +68,7 @@ const NewExitButton = () => {
     }
   }
 
-  return (
+  return currentRoom.owner == authedPerson.id ? (
     <Popover.Root>
       <Popover.Trigger asChild>
         <IconButton aria-label="New exit" variant="ghost">
@@ -119,5 +102,5 @@ const NewExitButton = () => {
         </Popover.Positioner>
       </Portal>
     </Popover.Root>
-  )
+  ) : ""
 }

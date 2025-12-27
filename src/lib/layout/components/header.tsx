@@ -3,17 +3,10 @@ import { Center, Box, Flex, Stack, IconButton } from "@chakra-ui/react";
 import { ColorModeButton } from "@/lib/components/ui/color-mode";
 import { Login } from "./login";
 import { LuHouse } from "react-icons/lu";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectCurrentPerson } from "@/app/store/slices/currentSelectors";
-import { updatePerson } from "@/app/store/slices/personSlice";
+import { useMoveTo } from "@/lib/pages/home/hooks/useMoveTo";
 
 export const Header = () => {
-  const currentPerson = useAppSelector(selectCurrentPerson);
-  const dispatch = useAppDispatch();
-
-  const goHome = async () => {
-    dispatch(updatePerson({id: currentPerson.id, location: 1}));
-  }
+  const moveTo = useMoveTo();
 
   return (
     <Flex
@@ -29,7 +22,7 @@ export const Header = () => {
           <Center>
             <Login />
             <ColorModeButton />
-            <IconButton aria-label="Go home" variant="ghost" onClick={goHome}>
+            <IconButton aria-label="Go home" variant="ghost" onClick={() => moveTo(1)}>
               <LuHouse />
             </IconButton>
           </Center>

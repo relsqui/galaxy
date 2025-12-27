@@ -34,7 +34,7 @@ export const updatePerson = createAsyncThunk<
   "person/updatePerson",
   async (updates: Partial<Person>, { getState }) => {
     const state = getState();
-    const personData = (
+    return (
       await supabase
         .from("person")
         .update(updates)
@@ -42,7 +42,6 @@ export const updatePerson = createAsyncThunk<
         .select()
         .single()
     ).data;
-    return personData;
   }
 )
 

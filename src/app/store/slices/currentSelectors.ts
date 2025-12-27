@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { selectPeople, selectPersonById } from "./personSlice";
-import { selectRoomById } from "./roomSlice";
+import { selectRoomById, selectRooms } from "./roomSlice";
 import { selectExits } from "./exitSlice";
 
 export const selectCurrentPerson =
@@ -23,3 +23,9 @@ export const selectCurrentExits = createSelector(
   selectCurrentLocation,
   (exits, currentLocation) => exits.filter(exit => exit.origin == currentLocation)
 );
+
+export const selectOwnedRooms = createSelector(
+  selectRooms,
+  selectCurrentPerson,
+  (rooms, currentPerson) => rooms.filter(room => room.owner == currentPerson.id)
+)

@@ -35,3 +35,5 @@ export interface broadcastPayload {
   old_record: any,
   record: any
 }
+
+export type AtLeastID<T> = { id: number } & Partial<T>

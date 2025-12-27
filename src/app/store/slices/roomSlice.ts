@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, createEntityAdapter } from "@reduxjs/toolkit"
 import { createClient } from "@supabase/supabase-js";
 import { RootState } from ".."
-import { Room } from "@/lib/pages/home/components/interfaces";
+import { AtLeastID, Room } from "@/lib/pages/home/components/interfaces";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -25,12 +25,26 @@ export const fetchRooms = createAsyncThunk("room/fetchRooms", async () => {
   }, {}) : {};
 });
 
-export const createRoom = createAsyncThunk("room/createRoom", async (owner) => {
-  return (await supabase.from("room").insert({ owner }).select().single()).data;
-});
+export const createRoom = createAsyncThunk<
+  Room,
+  undefined,
+  { state: RootState }
+>(
+  "room/createRoom",
+  async (_, { getState }) => {
+    const state = getState();
+    return (
+      await supabase
+        .from("room")
+        .insert({ owner: state.authedID.value })
+        .select()
+        .single()
+    ).data;
+  });
 
-export const updateRoom = createAsyncThunk("room/updateRoom", async (id, updates) => {
-  return (await supabase.from("room").update({ id, ...updates }).select().single()).data;
+export const updateRoom = createAsyncThunk("room/updateRoom", async (updates: AtLeastID<Room>) => {
+  console.log("updating:", updates);
+  return (await supabase.from("room").update(updates).eq("id", updates.id).select().single()).data;
 })
 
 export const roomSlice = createSlice({
@@ -41,7 +55,7 @@ export const roomSlice = createSlice({
     builder
       .addCase(fetchRooms.fulfilled, roomAdapter.setAll)
       .addCase(createRoom.fulfilled, roomAdapter.addOne)
-      .addCase(updateRoom.fulfilled, roomAdapter.updateOne)
+      .addCase(updateRoom.fulfilled, roomAdapter.upsertOne)
   }
 });
 
