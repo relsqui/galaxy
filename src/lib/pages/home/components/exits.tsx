@@ -1,23 +1,21 @@
-import { Button, ButtonGroup, Group, IconButton, Input, NativeSelect, Popover, Portal, Stack } from "@chakra-ui/react"
+import { Button, ButtonGroup, Group, IconButton, Input, NativeSelect, Popover, Portal, Separator, Stack, Text, usePopoverContext } from "@chakra-ui/react"
 import { LuCirclePlus } from "react-icons/lu"
-import { Exit } from "@/lib/pages/home/components/interfaces"
-import { createClient } from "@supabase/supabase-js";
-import { useAppSelector } from "@/app/hooks";
+
+import { Exit, ExitRequirements } from "@/lib/pages/home/components/interfaces"
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { selectCurrentExits, selectCurrentPerson, selectCurrentRoom, selectOwnedRooms } from "@/app/store/slices/currentSelectors";
 import { useMoveTo } from "../hooks/useMoveTo";
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-);
+import { createRoom } from "@/app/store/slices/roomSlice";
+import { createExit } from "@/app/store/slices/exitSlice";
 
 export const Exits = () => {
+  const authedPerson = useAppSelector(selectCurrentPerson);
+  const currentRoom = useAppSelector(selectCurrentRoom);
   const exits = useAppSelector(selectCurrentExits);
-  const currentPerson = useAppSelector(selectCurrentPerson);
   const moveTo = useMoveTo();
 
   const followExit = async (exit: Exit) => {
-    if (exit.origin == currentPerson.location) {
+    if (exit.origin == authedPerson.location) {
       await moveTo(exit.destination);
     }
   }
@@ -34,41 +32,20 @@ export const Exits = () => {
           {exit.title}
         </Button>
       ))}
-      <NewExitButton />
+      {
+        currentRoom.owner == authedPerson.id ? <NewExitButton /> : ""
+      }
     </ButtonGroup>
   )
 }
 
+// const EditButton = () => {
+//   const authedPerson = useAppSelector(selectCurrentPerson);
+//   const currentRoom = useAppSelector(selectCurrentRoom);
+// }
+
 const NewExitButton = () => {
-  const authedPerson = useAppSelector(selectCurrentPerson);
-  const currentRoom = useAppSelector(selectCurrentRoom);
-  const ownedRooms = useAppSelector(selectOwnedRooms);
-
-  const addExitTo = async (destination: number, name: string) => {
-    if (!authedPerson) return;
-    console.log(authedPerson.location)
-    await supabase.from("exit").insert({ origin: authedPerson.location, destination, title: name });
-  }
-
-  const handleNewExitToOldRoom = async (formData: FormData) => {
-    await addExitTo(
-      parseInt(formData.get("destination") as string),
-      formData.get("exitName") as string
-    )
-  }
-
-  const handleNewExitToNewRoom = async (formData: FormData) => {
-    if (!authedPerson) return;
-    const { data: newRoom, error } =
-      await supabase.from("room").insert({ owner: authedPerson.id }).select();
-    if (error) {
-      console.log(error);
-    } else {
-      await addExitTo(newRoom[0].id, formData.get("exitName") as string)
-    }
-  }
-
-  return currentRoom.owner == authedPerson.id ? (
+  return (
     <Popover.Root>
       <Popover.Trigger asChild>
         <IconButton aria-label="New exit" variant="ghost">
@@ -80,27 +57,59 @@ const NewExitButton = () => {
           <Popover.Content>
             <Popover.Arrow />
             <Popover.Body>
-              <form>
-                <Stack>
-                  <Input name="exitName" placeholder="New exit name" />
-                  <Group>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field name="destination" placeholder="Destination">
-                        {ownedRooms.map((room) => (
-                          <option value={room.id} key={room.id}>(#{room.id}) {room.title}</option>
-                        ))}
-                      </NativeSelect.Field>
-                    </NativeSelect.Root>
-                    <Button type="submit" formAction={handleNewExitToOldRoom}>Link</Button>
-                  </Group>
-                  <Button type="submit" formAction={handleNewExitToNewRoom}>Link to New Room</Button>
-                </Stack>
-              </form>
+              <NewExitForm />
             </Popover.Body>
             <Popover.CloseTrigger />
           </Popover.Content>
         </Popover.Positioner>
       </Portal>
     </Popover.Root>
-  ) : ""
+  )
+}
+
+const NewExitForm = () => {
+  const currentRoom = useAppSelector(selectCurrentRoom);
+  const ownedRooms = useAppSelector(selectOwnedRooms);
+  const dispatch = useAppDispatch();
+  const popover = usePopoverContext();
+
+  const normalizeExitForm = (formData: FormData): ExitRequirements => {
+    return {
+      origin: currentRoom.id,
+      destination: parseInt(formData.get("destination") as string) || 0,
+      title: formData.get("exitName") as string || "?",
+    }
+  }
+
+  const handleNewExitToOldRoom = async (formData: FormData) => {
+    await dispatch(createExit(normalizeExitForm(formData)));
+    popover.setOpen(false);
+  }
+
+  const handleNewExitToNewRoom = async (formData: FormData) => {
+    const newRoom = await dispatch(createRoom()).unwrap();
+    await dispatch(createExit({ ...normalizeExitForm(formData), destination: newRoom.id }));
+    popover.setOpen(false);
+  }
+
+  return (
+    <form>
+      <Stack>
+        <Input name="exitName" placeholder="New exit name" />
+        <Separator />
+        <Group>
+          <NativeSelect.Root>
+            <NativeSelect.Field name="destination" placeholder="Destination">
+              {ownedRooms.map((room) => (
+                <option value={room.id} key={room.id}>(#{room.id}) {room.title}</option>
+              ))}
+            </NativeSelect.Field>
+          </NativeSelect.Root>
+          <Button type="submit" formAction={handleNewExitToOldRoom}>Link</Button>
+        </Group>
+        <Text alignSelf="center">or</Text>
+        <Button type="submit" formAction={handleNewExitToNewRoom}>Link to New Room</Button>
+      </Stack>
+    </form>
+  )
 }

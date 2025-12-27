@@ -29,3 +29,9 @@ export const selectOwnedRooms = createSelector(
   selectCurrentPerson,
   (rooms, currentPerson) => rooms.filter(room => room.owner == currentPerson.id)
 )
+
+export const canEditThisRoom = createSelector(
+  selectCurrentPerson,
+  selectCurrentRoom,
+  (currentPerson, currentRoom) => currentRoom.owner == currentPerson.id
+)

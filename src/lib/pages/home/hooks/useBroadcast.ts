@@ -2,6 +2,12 @@
 // import { useState, useEffect } from "react";
 // import { broadcastPayload } from "../components/interfaces";
 
+// const supabase = createClient(
+//   import.meta.env.VITE_SUPABASE_URL,
+//   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+// );
+// await supabase.realtime.setAuth() // Needed for Realtime Authorization
+
 // const useBroadcast = () => {
 //   const [locChannel, setLocChannel] = useState<RealtimeChannel | null>();
 

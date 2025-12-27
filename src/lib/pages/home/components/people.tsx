@@ -24,7 +24,7 @@ export const profileDrawer = createOverlay<{ person: Person }>(props => {
 
   const dispatchUpdatePerson = async (field: keyof Person, value: string) => {
     if (value.length < 1) return;
-    dispatch(updatePerson({ id: person.id, [field]: value }));
+    await dispatch(updatePerson({ id: person.id, [field]: value }));
   }
 
   return (

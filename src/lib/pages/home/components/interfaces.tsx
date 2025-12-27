@@ -23,6 +23,9 @@ export interface Exit {
   destination: number;
 }
 
+// what you need to supply to make one
+export type ExitRequirements = Pick<Exit, "title" | "origin" | "destination">
+
 export enum dbOperation {
   INSERT = "INSERT",
   UPDATE = "UPDATE",
@@ -30,10 +33,10 @@ export enum dbOperation {
 }
 
 export interface broadcastPayload {
-  op: dbOperation,
-  table: string,
-  old_record: any,
-  record: any
+  op: dbOperation;
+  table: string;
+  old_record: any;
+  record: any;
 }
 
 export type AtLeastID<T> = { id: number } & Partial<T>

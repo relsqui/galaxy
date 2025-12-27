@@ -40,10 +40,10 @@ export const createRoom = createAsyncThunk<
         .select()
         .single()
     ).data;
-  });
+  }
+);
 
 export const updateRoom = createAsyncThunk("room/updateRoom", async (updates: AtLeastID<Room>) => {
-  console.log("updating:", updates);
   return (await supabase.from("room").update(updates).eq("id", updates.id).select().single()).data;
 })
 
