@@ -1,17 +1,18 @@
-import { Button, ButtonGroup, Group, IconButton, Input, NativeSelect, Popover, Portal, Separator, Stack, Text, usePopoverContext } from "@chakra-ui/react"
-import { LuCirclePlus } from "react-icons/lu"
+import { Button, ButtonGroup, CloseButton, Flex, Group, IconButton, Input, InputGroup, NativeSelect, Popover, Portal, Separator, Stack, Text, usePopoverContext } from "@chakra-ui/react"
+import { LuCirclePlus, LuPencil, LuPencilOff } from "react-icons/lu"
 
 import { Exit, ExitRequirements } from "@/lib/pages/home/components/interfaces"
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { selectCurrentExits, selectCurrentPerson, selectCurrentRoom, selectOwnedRooms } from "@/app/store/slices/currentSelectors";
 import { useMoveTo } from "../hooks/useMoveTo";
 import { createRoom } from "@/app/store/slices/roomSlice";
-import { createExit } from "@/app/store/slices/exitSlice";
+import { createExit, deleteExit, updateExit } from "@/app/store/slices/exitSlice";
+import { useState } from "react";
 
 export const Exits = () => {
   const authedPerson = useAppSelector(selectCurrentPerson);
-  const currentRoom = useAppSelector(selectCurrentRoom);
   const exits = useAppSelector(selectCurrentExits);
+  const [editing, setEditing] = useState(false);
   const moveTo = useMoveTo();
 
   const followExit = async (exit: Exit) => {
@@ -20,29 +21,68 @@ export const Exits = () => {
     }
   }
 
+  const toggleEditing = () => {
+    setEditing(!editing);
+  }
+
   return (
+    <Flex wrap="wrap" asChild>
+      <ButtonGroup>
+        {exits.map((exit) => editing ? (
+          <EditableExit exit={exit} />
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            key={exit.id}
+            onClick={async () => await followExit(exit)}
+          >
+            {exit.title}
+          </Button>
+        ))
+        }
+        <EditButton editing={editing} toggleEditing={toggleEditing} />
+      </ButtonGroup >
+    </Flex>
+  );
+}
+
+const EditableExit = ({ exit }: { exit: Exit }) => {
+  const [exitTitle, setExitTitle] = useState(exit.title);
+  const dispatch = useAppDispatch();
+
+  const deleteThisExit = async () => {
+    await dispatch(deleteExit(exit));
+  }
+
+  const commitTitle = async () => {
+    await dispatch(updateExit({ id: exit.id, title: exitTitle }))
+  }
+
+  return (
+    <InputGroup endElement={<CloseButton size="sm" variant="ghost" onClick={deleteThisExit} />}>
+      <Input
+        value={exitTitle}
+        onChange={(e) => setExitTitle(e.target.value)}
+        onBlur={commitTitle}
+      />
+    </InputGroup>
+  );
+
+}
+
+const EditButton = ({ editing, toggleEditing }: { editing: boolean, toggleEditing: () => void }) => {
+  const authedPerson = useAppSelector(selectCurrentPerson);
+  const currentRoom = useAppSelector(selectCurrentRoom);
+  return currentRoom.owner != authedPerson.id ? "" : (
     <ButtonGroup>
-      {exits.map((exit) => (
-        <Button
-          size="sm"
-          variant="outline"
-          key={exit.id}
-          onClick={async () => await followExit(exit)}
-        >
-          {exit.title}
-        </Button>
-      ))}
-      {
-        currentRoom.owner == authedPerson.id ? <NewExitButton /> : ""
-      }
+      {editing ? <NewExitButton /> : ""}
+      <IconButton aria-label="Edit exits" variant="ghost" onClick={toggleEditing}>
+        {editing ? <LuPencilOff /> : <LuPencil />}
+      </IconButton>
     </ButtonGroup>
   )
 }
-
-// const EditButton = () => {
-//   const authedPerson = useAppSelector(selectCurrentPerson);
-//   const currentRoom = useAppSelector(selectCurrentRoom);
-// }
 
 const NewExitButton = () => {
   return (
