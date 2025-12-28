@@ -20,11 +20,18 @@ export const fetchAuthedID = createAsyncThunk("authedID/fetchAuthedID", async ()
 
 export const authedIDSlice = createSlice({
   name: "authedID",
-  initialState: { value: 0 },
+  initialState: { loading: "idle", value: 0 },
   reducers: {},
   extraReducers: builder => {
     builder
+      .addCase(fetchAuthedID.pending, (state) => {
+        state.loading = "pending"
+      })
+      .addCase(fetchAuthedID.rejected, (state) => {
+        state.loading = "failed"
+      })
       .addCase(fetchAuthedID.fulfilled, (state, action: PayloadAction<number>) => {
+        state.loading = "succeeded"
         state.value = action.payload
       })
   }

@@ -4,6 +4,8 @@ import { selectPeople, selectPersonById } from "./personSlice";
 import { selectRoomById, selectRooms } from "./roomSlice";
 import { selectExits } from "./exitSlice";
 
+export const selectIsAuthed = (state: RootState) => state.authedID.loading == "succeeded" && !!state.authedID.value;
+
 export const selectCurrentPerson =
   (state: RootState) => selectPersonById(state, state.authedID.value);
 

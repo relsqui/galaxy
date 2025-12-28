@@ -15,6 +15,15 @@ export interface Room {
   owner: number;
 }
 
+export interface Message {
+  id: number;
+  created_at: Date;
+  location: number;
+  owner: number;
+  type: string;
+  content: any;
+}
+
 export interface Exit {
   id: number;
   title: string;
@@ -25,18 +34,5 @@ export interface Exit {
 
 // what you need to supply to make one
 export type ExitRequirements = Pick<Exit, "title" | "origin" | "destination">
-
-export enum dbOperation {
-  INSERT = "INSERT",
-  UPDATE = "UPDATE",
-  DELETE = "DELETE"
-}
-
-export interface broadcastPayload {
-  op: dbOperation;
-  table: string;
-  old_record: any;
-  record: any;
-}
-
+export type MessageRequirements = Pick<Message, "type" | "content">
 export type AtLeastID<T> = { id: number } & Partial<T>

@@ -3,6 +3,7 @@ import authedIDReducer from "./slices/authedIDSlice"
 import personReducer from "./slices/personSlice"
 import roomReducer from "./slices/roomSlice"
 import exitReducer from "./slices/exitSlice"
+import messageReducer from "./slices/messageSlice"
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     person: personReducer,
     room: roomReducer,
     exit: exitReducer,
+    message: messageReducer,
   }
 })
 

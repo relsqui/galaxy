@@ -7,6 +7,7 @@ import { updateRoom } from "@/app/store/slices/roomSlice";
 
 import { People, profileDrawer } from "@/lib/pages/home/components/people";
 import { Exits } from "@/lib/pages/home/components/exits";
+import { Chat } from "@/lib/pages/home/components/chat";
 
 
 // this can't be Room because that's the interface
@@ -55,6 +56,7 @@ export const RoomContents = () => {
         </Editable.Root>
         <Exits />
         <People />
+        <Chat />
       </Stack>
       <profileDrawer.Viewport />
     </>

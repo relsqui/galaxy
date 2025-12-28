@@ -6,7 +6,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { Layout } from '@/lib/layout';
 
 const title = 'Galaxy';
-// const description = 'app starter template';
+const description = 'Lots to explore.';
 // const url = 'https://vite-react-chakra-starter.sznm.dev';
 // const ogImgUrl =
 //   'https://og.sznm.dev/api/generate?heading=vite-react-chakra-starter&text=React+vite+template+with+Chakra+UI+and+TypeScript+setup.&template=color';
@@ -17,10 +17,10 @@ export const Route = createRootRoute({
       {
         title,
       },
-      // {
-      //   name: 'description',
-      //   content: description,
-      // },
+      {
+        name: 'description',
+        content: description,
+      },
       {
         name: 'viewport',
         content: 'width=device-width, initial-scale=1.0',
@@ -65,10 +65,10 @@ export const Route = createRootRoute({
         name: 'og:title',
         content: title,
       },
-      // {
-      //   name: 'og:description',
-      //   content: description,
-      // },
+      {
+        name: 'og:description',
+        content: description,
+      },
       // {
       //   name: 'og:image',
       //   content: ogImgUrl,
@@ -85,10 +85,10 @@ export const Route = createRootRoute({
         name: 'twitter:title',
         content: title,
       },
-      // {
-      //   name: 'twitter:description',
-      //   content: description,
-      // },
+      {
+        name: 'twitter:description',
+        content: description,
+      },
       // {
       //   name: 'twitter:image',
       //   content: ogImgUrl,

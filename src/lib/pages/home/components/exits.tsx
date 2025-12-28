@@ -77,7 +77,7 @@ const EditButton = ({ editing, toggleEditing }: { editing: boolean, toggleEditin
   return currentRoom.owner != authedPerson.id ? "" : (
     <ButtonGroup>
       {editing ? <NewExitButton /> : ""}
-      <IconButton aria-label="Edit exits" variant="ghost" onClick={toggleEditing}>
+      <IconButton aria-label="Edit exits" variant="ghost" size="xs" onClick={toggleEditing}>
         {editing ? <LuPencilOff /> : <LuPencil />}
       </IconButton>
     </ButtonGroup>
