@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
   const isCheckDisabled = mode === 'production' || !!process.env.VITEST;
   return {
     // use a base path for github pages only
-    // base: mode === 'production' ? "/galaxy/" : "/",
+    base: mode === 'production' ? "/galaxy" : "/",
     plugins: [
       devtools(),
       tanstackRouter({ autoCodeSplitting: true }),
