@@ -14,7 +14,6 @@ import { fetchExits } from './app/store/slices/exitSlice';
 import { Provider as UIProvider } from '@/lib/components/ui/provider';
 import { BroadcastProvider } from './lib/components/broadcast/provider';
 
-import Page404 from '@/lib/pages/404';
 import { queryClient } from '@/lib/services/constants';
 
 // Import the generated route tree
@@ -38,7 +37,7 @@ const router = createRouter({
       <p>Loading...</p>
     </div>
   ),
-  defaultNotFoundComponent: () => <Page404 />,
+  // defaultNotFoundComponent: () => <Page404 />,
 });
 
 // Register the router instance for type safety
