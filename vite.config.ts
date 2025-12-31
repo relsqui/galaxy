@@ -35,8 +35,8 @@ const pwaOptions: Partial<VitePWAOptions> = {
 export default defineConfig(({ mode }) => {
   const isCheckDisabled = mode === 'production' || !!process.env.VITEST;
   return {
-    // use a base path for github pages only
-    base: mode === 'production' ? "/galaxy" : "/",
+    // use a base path for github pages without a custom domain
+    // base: mode === 'production' ? "/galaxy" : "/",
     plugins: [
       devtools(),
       tanstackRouter({ autoCodeSplitting: true }),
