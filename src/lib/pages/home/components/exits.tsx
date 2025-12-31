@@ -135,7 +135,7 @@ const NewExitForm = () => {
   return (
     <form>
       <Stack>
-        <Input name="exitName" placeholder="New exit name" />
+        <Input name="exitName" placeholder="New exit name" autoComplete="off" />
         <Separator />
         <Group>
           <NativeSelect.Root>
