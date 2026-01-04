@@ -13,6 +13,26 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { selectCurrentNeighbors, selectCurrentPerson } from '@/app/store/slices/currentSelectors';
 import { updatePerson } from '@/app/store/slices/personSlice';
 
+export const People = () => {
+  const people = useAppSelector(selectCurrentNeighbors);
+  return (
+    <Stack direction="row">
+      {people.map((person) => (
+        <Button
+          size="xs"
+          variant="surface"
+          key={person.id}
+          onClick={async () =>
+            await profileDrawer.open("profileDrawer", { person })
+          }
+        >
+          {person.display_name}
+        </Button>
+      ))
+      }
+    </Stack >
+  )
+}
 
 export const profileDrawer = createOverlay<{ person: Person }>(props => {
   const { person } = props;
@@ -69,24 +89,3 @@ export const profileDrawer = createOverlay<{ person: Person }>(props => {
     </Drawer.Root>
   );
 });
-
-export const People = () => {
-  const people = useAppSelector(selectCurrentNeighbors);
-  return (
-    <Stack direction="row">
-      {people.map((person) => (
-        <Button
-          size="xs"
-          variant="surface"
-          key={person.id}
-          onClick={async () =>
-            await profileDrawer.open("profileDrawer", { person })
-          }
-        >
-          {person.display_name}
-        </Button>
-      ))
-      }
-    </Stack >
-  )
-}

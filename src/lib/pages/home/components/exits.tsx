@@ -30,10 +30,9 @@ export const Exits = ({ canEdit }: { canEdit: boolean }) => {
     <Flex wrap="wrap" asChild>
       <ButtonGroup>
         {exits.map((exit) => editing ? (
-          <EditableExit exit={exit} />
+          <EditableExit exit={exit} key={exit.id} />
         ) : (
           <Button
-            size="sm"
             variant="outline"
             key={exit.id}
             onClick={async () => await followExit(exit)}
