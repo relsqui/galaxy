@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Checkbox, CloseButton, Field, Flex, Group, IconButton, Input, InputGroup, NativeSelect, Popover, Portal, Separator, Stack, Text, usePopoverContext } from "@chakra-ui/react"
-import { LuCirclePlus, LuLock, LuPencil, LuPencilOff } from "react-icons/lu"
+import { LuCirclePlus, LuLock, LuLockOpen, LuPencil, LuPencilOff } from "react-icons/lu"
 
 import { Exit, ExitRequirements } from "@/lib/pages/home/components/interfaces"
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
@@ -39,7 +39,7 @@ export const Exits = ({ canEdit }: { canEdit: boolean }) => {
             onClick={async () => await followExit(exit)}
             disabled={exit.locked && !canEdit}
           >
-            {exit.locked ? <LuLock /> : ""}
+            {exit.locked ? canEdit ? <LuLockOpen /> : <LuLock /> : ""}
             {exit.title}
           </Button>
         ))
