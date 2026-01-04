@@ -30,9 +30,11 @@ export interface Exit {
   description: string;
   origin: number;
   destination: number;
+  locked: boolean;
 }
 
 // what you need to supply to make one
-export type ExitRequirements = Pick<Exit, "title" | "origin" | "destination">
+export type ExitRequirements = Pick<Exit, "title" | "origin" | "destination" | "locked">
 export type MessageRequirements = Pick<Message, "type" | "content">
+
 export type AtLeastID<T> = { id: number } & Partial<T>

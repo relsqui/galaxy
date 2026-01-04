@@ -1,5 +1,5 @@
-import { Button, ButtonGroup, CloseButton, Flex, Group, IconButton, Input, InputGroup, NativeSelect, Popover, Portal, Separator, Stack, Text, usePopoverContext } from "@chakra-ui/react"
-import { LuCirclePlus, LuPencil, LuPencilOff } from "react-icons/lu"
+import { Button, ButtonGroup, Checkbox, CloseButton, Field, Flex, Group, IconButton, Input, InputGroup, NativeSelect, Popover, Portal, Separator, Stack, Text, usePopoverContext } from "@chakra-ui/react"
+import { LuCirclePlus, LuLock, LuPencil, LuPencilOff } from "react-icons/lu"
 
 import { Exit, ExitRequirements } from "@/lib/pages/home/components/interfaces"
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
@@ -9,13 +9,14 @@ import { createRoom } from "@/app/store/slices/roomSlice";
 import { createExit, deleteExit, updateExit } from "@/app/store/slices/exitSlice";
 import { useState } from "react";
 
-export const Exits = () => {
+export const Exits = ({ canEdit }: { canEdit: boolean }) => {
   const authedPerson = useAppSelector(selectCurrentPerson);
   const exits = useAppSelector(selectCurrentExits);
   const [editing, setEditing] = useState(false);
   const moveTo = useMoveTo();
 
   const followExit = async (exit: Exit) => {
+    // TODO move this check inside moveTo if it's not also there already
     if (exit.origin == authedPerson.location) {
       await moveTo(exit.destination);
     }
@@ -36,12 +37,14 @@ export const Exits = () => {
             variant="outline"
             key={exit.id}
             onClick={async () => await followExit(exit)}
+            disabled={exit.locked && !canEdit}
           >
+            {exit.locked ? <LuLock /> : ""}
             {exit.title}
           </Button>
         ))
         }
-        <EditButton editing={editing} toggleEditing={toggleEditing} />
+        {canEdit ? <EditButton {...{ editing, toggleEditing }} /> : ""}
       </ButtonGroup >
     </Flex>
   );
@@ -118,6 +121,7 @@ const NewExitForm = () => {
       origin: currentRoom.id,
       destination: parseInt(formData.get("destination") as string) || 0,
       title: formData.get("exitName") as string || "?",
+      locked: formData.get("locked") == "on" ? true : false,
     }
   }
 
@@ -136,6 +140,18 @@ const NewExitForm = () => {
     <form>
       <Stack>
         <Input name="exitName" placeholder="New exit name" autoComplete="off" />
+        <Field.Root>
+          <Checkbox.Root name="locked">
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Checkbox.Label>
+              Locked
+            </Checkbox.Label>
+          </Checkbox.Root>
+          <Field.HelperText>
+            Only you can use your locked exits.
+          </Field.HelperText>
+        </Field.Root>
         <Separator />
         <Group>
           <NativeSelect.Root>

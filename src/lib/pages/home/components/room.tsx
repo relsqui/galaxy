@@ -54,7 +54,7 @@ export const RoomContents = () => {
           <Editable.Preview />
           <Editable.Textarea />
         </Editable.Root>
-        <Exits />
+        <Exits canEdit={authedPerson.id == room.owner} />
         <People />
         <Chat />
       </Stack>
