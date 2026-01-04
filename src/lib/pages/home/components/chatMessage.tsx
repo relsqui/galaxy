@@ -24,7 +24,7 @@ const usePredicate = (operation: DBOperation, changes: any) => {
   }
 
   // TODO: commaAnd(string[]): string
-  return predicates.join(", ") + ".";
+  return predicates.length ? predicates.join(", ") + "." : null;
 }
 
 export const PersonMessage = ({ message }: { message: GalaxyMessage }) => {
@@ -32,11 +32,11 @@ export const PersonMessage = ({ message }: { message: GalaxyMessage }) => {
   // ... I will probably wind up inlining this, it's not actually very general
   const predicate = usePredicate(message.operation, message.changes);
 
-  return (
+  return predicate ? (
     <Box>
       {person.display_name} {predicate}
     </Box>
-  )
+  ) : "";
 }
 
 export const MessageMessage = ({ message }: { message: GalaxyMessage }) => {
